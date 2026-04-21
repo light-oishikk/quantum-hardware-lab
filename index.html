@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Hardware Interactive Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e17;--bg2:#111827;--bg3:#1a1f2e;--bg4:#222840;--bgI:#0d1220;--brd:#2a3348;--t1:#e8ecf4;--t2:#94a3b8;--t3:#64748b;--ta:#60a5fa;--ab:#3b82f6;--ac:#06b6d4;--ap:#8b5cf6;--ag:#10b981;--aw:#f59e0b;--ar:#ef4444;--gp:linear-gradient(135deg,#3b82f6,#8b5cf6);--r:12px;--rs:8px;--f:'Inter',sans-serif;--fm:'JetBrains Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:var(--f);background:var(--bg);color:var(--t1);display:flex;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--brd);border-radius:3px}
+
+#sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--brd);position:fixed;top:0;left:0;height:100vh;z-index:100;display:flex;flex-direction:column}
+.shead{padding:1.2rem 1rem .8rem;border-bottom:1px solid var(--brd);text-align:center}
+.shead .logo{font-size:2rem;display:block;margin-bottom:.2rem;filter:drop-shadow(0 0 12px rgba(59,130,246,.5));animation:pg 3s ease-in-out infinite}
+@keyframes pg{0%,100%{filter:drop-shadow(0 0 8px rgba(59,130,246,.4))}50%{filter:drop-shadow(0 0 20px rgba(139,92,246,.6))}}
+.shead h1{font-size:1.2rem;font-weight:800;background:var(--gp);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.shead .sub{font-size:.65rem;color:var(--t3);text-transform:uppercase;letter-spacing:1px;display:block;margin-top:.15rem}
+.nlist{list-style:none;padding:.6rem .5rem;flex:1}
+.ni{display:flex;align-items:center;gap:.5rem;padding:.6rem .7rem;border-radius:var(--rs);cursor:pointer;transition:.2s;margin-bottom:.2rem;position:relative}
+.ni::before{content:'';position:absolute;left:0;top:0;height:100%;width:3px;background:var(--gp);border-radius:0 3px 3px 0;opacity:0;transition:.2s}
+.ni:hover{background:var(--bg4)}
+.ni.active{background:rgba(59,130,246,.12)}.ni.active::before{opacity:1}.ni.active .nl{color:var(--ta);font-weight:600}
+.nic{font-size:1rem;flex-shrink:0}
+.nl{font-size:.8rem;color:var(--t2);flex:1;white-space:nowrap}
+.nu{font-size:.58rem;color:var(--t3);background:var(--bgI);padding:.12rem .35rem;border-radius:4px;font-family:var(--fm)}
+.sfoot{padding:.8rem;border-top:1px solid var(--brd);font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;text-align:center}
+
+#main{flex:1;margin-left:220px;padding:1.2rem 1.5rem;max-width:1100px}
+.lab{display:none}.lab.active{display:block;animation:fi .3s ease-out}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.lh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.2rem;padding-bottom:.8rem;border-bottom:1px solid var(--brd)}
+.lh h2{font-size:1.5rem;font-weight:800;background:var(--gp);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.lh p{color:var(--t2);font-size:.8rem;margin-top:.2rem;max-width:550px}
+.hb{display:flex;gap:.4rem}
+.badge{font-size:.6rem;font-weight:600;padding:.25rem .5rem;border-radius:4px;font-family:var(--fm)}
+.bu{background:rgba(59,130,246,.15);color:var(--ab);border:1px solid rgba(59,130,246,.25)}
+.bl{background:rgba(139,92,246,.15);color:var(--ap);border:1px solid rgba(139,92,246,.25)}
+
+.g2{display:grid;gap:1rem;grid-template-columns:360px 1fr}
+@media(max-width:900px){.g2{grid-template-columns:1fr}}
+
+.p{background:var(--bg3);border:1px solid var(--brd);border-radius:var(--r);padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.p h3{font-size:.8rem;font-weight:700;color:var(--ta);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem}
+.p h4{font-size:.7rem;font-weight:600;color:var(--t2);margin-bottom:.4rem}
+
+.cg{margin-bottom:.8rem}
+.cg label{display:block;font-size:.75rem;color:var(--t2);margin-bottom:.3rem;font-weight:500}
+.cg label span{color:var(--ta);font-family:var(--fm);font-weight:600}
+.cg small{display:block;color:var(--t3);font-size:.62rem;margin-top:.15rem}
+
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:var(--bgI);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--ab);cursor:pointer;box-shadow:0 0 8px rgba(59,130,246,.5)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--ab);border:none;cursor:pointer}
+
+select{width:100%;padding:.45rem .6rem;background:var(--bgI);border:1px solid var(--brd);border-radius:4px;color:var(--t1);font-family:var(--f);font-size:.75rem;cursor:pointer;outline:none}
+select:focus{border-color:var(--ab)}
+
+.br{display:flex;gap:.4rem;margin-top:.8rem}
+.btn{padding:.5rem .9rem;border:none;border-radius:4px;font-family:var(--f);font-weight:600;font-size:.75rem;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:.25rem}
+.bp{background:var(--gp);color:#fff}.bp:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(59,130,246,.35)}
+.bs{background:var(--bgI);color:var(--t2);border:1px solid var(--brd)}.bs:hover{border-color:var(--ab);color:var(--t1)}
+.bsm{padding:.35rem .6rem;font-size:.7rem}
+
+.sp{display:flex;gap:.35rem;flex-wrap:wrap}
+.sb{padding:.35rem .6rem;border:1px solid var(--brd);border-radius:4px;background:var(--bgI);color:var(--t2);font-family:var(--fm);font-size:.72rem;cursor:pointer;transition:.2s}
+.sb:hover{border-color:var(--ab);color:var(--t1)}
+.sb.active{background:rgba(59,130,246,.15);border-color:var(--ab);color:var(--ab);font-weight:600}
+
+.rb{background:var(--bgI);border:1px solid var(--brd);border-radius:var(--rs);padding:.7rem;margin-top:.8rem}
+.rb h4{margin-bottom:.5rem;padding-bottom:.3rem;border-bottom:1px solid var(--brd)}
+.rr{display:flex;justify-content:space-between;align-items:center;padding:.25rem 0;font-size:.72rem}
+.rr span:first-child{color:var(--t2)}.rr span:last-child{color:var(--ta);font-family:var(--fm);font-weight:600}
+
+canvas{width:100%;display:block;border-radius:var(--rs);background:var(--bgI);border:1px solid var(--brd)}
+
+.bro{display:flex;gap:.4rem;margin-top:.7rem;flex-wrap:wrap}
+.ri{flex:1;min-width:60px;background:var(--bgI);border:1px solid var(--brd);border-radius:4px;padding:.35rem .4rem;text-align:center}
+.rl{display:block;font-size:.55rem;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.rv{display:block;font-size:.8rem;font-family:var(--fm);font-weight:600;color:var(--ta);margin-top:.1rem}
+
+.dm{display:flex;justify-content:center;padding:.8rem}
+.mt{border-collapse:collapse;font-family:var(--fm);font-size:.82rem}
+.mt td{padding:.5rem .8rem;border:1px solid var(--brd);text-align:center;min-width:90px;transition:.2s}
+.mi{text-align:center;margin-top:.4rem;font-size:.72rem;color:var(--t2);display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.mi span{color:var(--ta);font-family:var(--fm);font-weight:600}
+
+.tp{margin-top:.8rem;border-left:3px solid var(--ap)}
+.tp h3{color:var(--ap)}
+.tc{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.6rem}
+.eb{background:var(--bgI);border:1px solid var(--brd);border-radius:4px;padding:.6rem}
+.eb strong{display:block;font-size:.68rem;color:var(--t2);margin-bottom:.2rem}
+.eq{font-family:var(--fm);font-size:.73rem;color:var(--ac);line-height:1.4}
+</style>
+</head>
+<body>
+<nav id="sidebar">
+<div class="shead"><span class="logo">&#9883;</span><h1>QH Lab</h1><span class="sub">Quantum Hardware Simulator</span></div>
+<ul class="nlist">
+<li class="ni active" data-lab="coherence"><span class="nic">&#127744;</span><span class="nl">Decoherence Lab</span><span class="nu">Unit I</span></li>
+<li class="ni" data-lab="transmon"><span class="nic">&#9889;</span><span class="nl">Transmon Designer</span><span class="nu">Unit II</span></li>
+<li class="ni" data-lab="photonic"><span class="nic">&#128161;</span><span class="nl">Photonic Circuit</span><span class="nu">Unit III</span></li>
+<li class="ni" data-lab="iontrap"><span class="nic">&#128300;</span><span class="nl">Ion Trap Sim</span><span class="nu">Unit IV</span></li>
+<li class="ni" data-lab="nvcenter"><span class="nic">&#128142;</span><span class="nl">NV Center Lab</span><span class="nu">Unit V</span></li>
+</ul>
+<div class="sfoot">Primer on Quantum Computers</div>
+</nav>
+
+<main id="main">
+
+<!-- LAB 1 -->
+<section id="lab-coherence" class="lab active">
+<div class="lh"><div><h2>Decoherence &amp; Noise Simulator</h2><p>Real-time T1/T2 decay on the Bloch sphere with density matrix evolution.</p></div><div class="hb"><span class="badge bu">Unit I</span><span class="badge bl">LO2</span></div></div>
+<div class="g2">
+<div class="p">
+<h3>Parameters</h3>
+<div class="cg"><label>Initial State</label><div class="sp"><button class="sb active" data-st="plus" onclick="setSt(this)">|+&rang;</button><button class="sb" data-st="zero" onclick="setSt(this)">|0&rang;</button><button class="sb" data-st="one" onclick="setSt(this)">|1&rang;</button><button class="sb" data-st="custom" onclick="setSt(this)">Custom</button></div></div>
+<div class="cg" id="custA" style="display:none"><label>theta: <span id="thV">90</span>deg</label><input type="range" id="thR" min="0" max="180" value="90" step="1" oninput="document.getElementById('thV').textContent=this.value"><label>phi: <span id="phV">0</span>deg</label><input type="range" id="phR" min="0" max="360" value="0" step="1" oninput="document.getElementById('phV').textContent=this.value"></div>
+<div class="cg"><label>T1 (relaxation): <span id="t1V">50</span> us</label><input type="range" id="t1R" min="1" max="200" value="50" oninput="document.getElementById('t1V').textContent=this.value"></div>
+<div class="cg"><label>T2 (dephasing): <span id="t2V">30</span> us</label><input type="range" id="t2R" min="1" max="200" value="30" oninput="document.getElementById('t2V').textContent=this.value"></div>
+<div class="cg"><label>Noise Channel</label><select id="chSel"><option value="combined">Combined T1 + T2</option><option value="amplitude">Amplitude Damping</option><option value="phase">Phase Damping</option><option value="depolarizing">Depolarizing</option></select></div>
+<div class="cg"><label>Platform Preset</label><select id="presSel" onchange="applyPreset(this.value)"><option value="">Custom</option><option value="transmon">Transmon (T1~50us, T2~30us)</option><option value="ion">Trapped Ion (T1~200us, T2~200us)</option><option value="nv">NV Center (T1~120us, T2~40us)</option></select></div>
+<div class="cg"><label>Speed: <span id="spV">1.0</span>x</label><input type="range" id="spR" min="0.1" max="10" value="1" step="0.1" oninput="document.getElementById('spV').textContent=parseFloat(this.value).toFixed(1)"></div>
+<div class="br"><button class="btn bp" id="cohGo" onclick="toggleCoh()">&#9654; Start</button><button class="btn bs" onclick="resetCoh()">&#8634; Reset</button></div>
+</div>
+<div class="p">
+<h3>Bloch Sphere</h3>
+<canvas id="cBloch" style="height:380px"></canvas>
+<div class="bro">
+<div class="ri"><span class="rl">&lang;X&rang;</span><span class="rv" id="dRx">1.000</span></div>
+<div class="ri"><span class="rl">&lang;Y&rang;</span><span class="rv" id="dRy">0.000</span></div>
+<div class="ri"><span class="rl">&lang;Z&rang;</span><span class="rv" id="dRz">0.000</span></div>
+<div class="ri"><span class="rl">Purity</span><span class="rv" id="dPu">1.000</span></div>
+<div class="ri"><span class="rl">Time</span><span class="rv" id="dTm">0.0 us</span></div>
+</div>
+</div>
+</div>
+<div class="g2" style="margin-top:.8rem">
+<div class="p">
+<h3>Density Matrix rho(t)</h3>
+<div class="dm"><table class="mt"><tr><td id="r00">0.500</td><td id="r01">0.500</td></tr><tr><td id="r10">0.500</td><td id="r11">0.500</td></tr></table></div>
+<div class="mi"><p>Tr(rho)=<span id="dTr">1.000</span></p><p>Tr(rho^2)=<span id="dPu2">1.000</span></p><p>S(rho)=<span id="dEn">0.000</span> bits</p></div>
+</div>
+<div class="p"><h3>Expectation Values vs Time</h3><canvas id="cDecay" style="height:240px"></canvas></div>
+</div>
+<div class="p tp">
+<h3>Physics Reference</h3>
+<div class="tc">
+<div class="eb"><strong>Lindblad Master Equation:</strong><div class="eq">d rho/dt = -i[H,rho] + Sum_k (L_k rho L_k^dag - 1/2 {L_k^dag L_k, rho})</div></div>
+<div class="eb"><strong>Amplitude Damping (T1):</strong><div class="eq">rho_11(t) = rho_11(0) exp(-t/T1), rho_01(t) = rho_01(0) exp(-t/2T1)</div></div>
+<div class="eb"><strong>Pure Dephasing:</strong><div class="eq">1/T2 = 1/(2T1) + 1/T_phi. Off-diag: rho_01(t) = rho_01(0) exp(-t/T2)</div></div>
+<div class="eb"><strong>Constraint:</strong><div class="eq">T2 &le; 2T1 (always enforced in physical systems)</div></div>
+</div>
+</div>
+</section>
+
+<!-- LAB 2 -->
+<section id="lab-transmon" class="lab">
+<div class="lh"><div><h2>Transmon Qubit Designer</h2><p>Diagonalize the Cooper Pair Box Hamiltonian. Tune E_J/E_C to design a transmon.</p></div><div class="hb"><span class="badge bu">Unit II</span><span class="badge bl">LO4</span></div></div>
+<div class="g2">
+<div class="p">
+<h3>Hamiltonian Parameters</h3>
+<div class="cg"><label>E_J / E_C: <span id="trRV">50</span></label><input type="range" id="trR" min="1" max="100" value="50" step="0.5" oninput="document.getElementById('trRV').textContent=this.value"></div>
+<div class="cg"><label>E_C (GHz): <span id="trEV">0.20</span></label><input type="range" id="trE" min="0.05" max="1" value="0.2" step="0.01" oninput="document.getElementById('trEV').textContent=parseFloat(this.value).toFixed(2)"></div>
+<div class="cg"><label>Gate Charge n_g: <span id="trNV">0.00</span></label><input type="range" id="trN" min="0" max="1" value="0" step="0.01" oninput="document.getElementById('trNV').textContent=parseFloat(this.value).toFixed(2)"></div>
+<div class="cg"><label>Charge basis: <span id="trBV">15</span></label><input type="range" id="trB" min="5" max="30" value="15" step="1" oninput="document.getElementById('trBV').textContent=this.value"></div>
+<div class="cg"><label># Levels: <span id="trLV">5</span></label><input type="range" id="trL" min="2" max="8" value="5" step="1" oninput="document.getElementById('trLV').textContent=this.value"></div>
+<div class="br"><button class="btn bp" onclick="compTrans()">Compute Spectrum</button><button class="btn bs" onclick="sweepEjEc()">Sweep E_J/E_C</button></div>
+<div class="br"><button class="btn bs bsm" onclick="sweepNg()">Sweep n_g</button></div>
+<div class="rb"><h4>Computed Properties</h4>
+<div class="rr"><span>w_01 (qubit freq)</span><span id="tw01">--</span></div>
+<div class="rr"><span>w_12</span><span id="tw12">--</span></div>
+<div class="rr"><span>Anharmonicity alpha</span><span id="tAlpha">--</span></div>
+<div class="rr"><span>alpha / w_01</span><span id="tRel">--</span></div>
+<div class="rr"><span>Charge dispersion</span><span id="tDisp">--</span></div>
+</div>
+</div>
+<div class="p"><h3>Energy Spectrum</h3><canvas id="cSpec" style="height:420px"></canvas></div>
+</div>
+<div class="g2" style="margin-top:.8rem">
+<div class="p"><h3>Energy vs Gate Charge n_g</h3><canvas id="cNg" style="height:280px"></canvas></div>
+<div class="p"><h3>Energy Levels vs E_J/E_C</h3><canvas id="cAnharm" style="height:280px"></canvas></div>
+</div>
+<div class="p tp"><h3>Physics Reference</h3><div class="tc">
+<div class="eb"><strong>CPB Hamiltonian:</strong><div class="eq">H = 4 E_C (n - n_g)^2 - E_J cos(phi)</div></div>
+<div class="eb"><strong>Charge basis:</strong><div class="eq">&lang;n|H|n&rang; = 4 E_C (n-n_g)^2, &lang;n|H|n+/-1&rang; = -E_J/2</div></div>
+<div class="eb"><strong>Transmon (E_J/E_C >> 1):</strong><div class="eq">E_m ~ -E_J + sqrt(8 E_J E_C)(m+1/2) - E_C/12 (6m^2+6m+3)</div></div>
+<div class="eb"><strong>Anharmonicity:</strong><div class="eq">alpha = w_12 - w_01 ~ -E_C</div></div>
+</div></div>
+</section>
+
+<!-- LAB 3 -->
+<section id="lab-photonic" class="lab">
+<div class="lh"><div><h2>Photonic Quantum Circuit Lab</h2><p>Beam splitter interference and Hong-Ou-Mandel effect simulation.</p></div><div class="hb"><span class="badge bu">Unit III</span><span class="badge bl">LO1,LO3</span></div></div>
+<div class="g2">
+<div class="p">
+<h3>Hong-Ou-Mandel Experiment</h3>
+<div class="cg"><label>Reflectivity R: <span id="pRV">0.50</span></label><input type="range" id="pRR" min="0" max="1" value="0.5" step="0.01" oninput="document.getElementById('pRV').textContent=parseFloat(this.value).toFixed(2)"></div>
+<div class="cg"><label>Distinguishability xi: <span id="pDV">0.00</span></label><input type="range" id="pDR" min="0" max="1" value="0" step="0.01" oninput="document.getElementById('pDV').textContent=parseFloat(this.value).toFixed(2)"><small>0=identical, 1=distinguishable</small></div>
+<div class="br"><button class="btn bp" onclick="compPhot()">Compute</button><button class="btn bs" onclick="sweepHOM()">HOM Dip Sweep</button></div>
+<div class="rb"><h4>Output Probabilities</h4>
+<div class="rr"><span>P(2,0)</span><span id="pp20">--</span></div>
+<div class="rr"><span>P(0,2)</span><span id="pp02">--</span></div>
+<div class="rr"><span>P(1,1) coincidence</span><span id="pp11">--</span></div>
+<div class="rr"><span>HOM Visibility</span><span id="pVis">--</span></div>
+</div>
+<h3 style="margin-top:1.2rem">Mach-Zehnder</h3>
+<div class="cg"><label>Phase phi_MZ: <span id="pMV">0</span> deg</label><input type="range" id="pMR" min="0" max="360" value="0" step="1" oninput="document.getElementById('pMV').textContent=this.value"></div>
+<button class="btn bp bsm" onclick="compMZI()">Compute MZI</button>
+<div class="rb" style="margin-top:.4rem"><div class="rr"><span>P(det 1)</span><span id="pM1">--</span></div><div class="rr"><span>P(det 2)</span><span id="pM2">--</span></div></div>
+</div>
+<div class="p"><h3>HOM Dip</h3><canvas id="cHOM" style="height:300px"></canvas><h3 style="margin-top:.8rem">Beam Splitter</h3><canvas id="cBS" style="height:200px"></canvas></div>
+</div>
+<div class="p tp"><h3>Physics Reference</h3><div class="tc">
+<div class="eb"><strong>BS Transform:</strong><div class="eq">(a'1,a'2)^T = U(a1,a2)^T, U=[[sqrt(R),i*sqrt(T)],[i*sqrt(T),sqrt(R)]]</div></div>
+<div class="eb"><strong>HOM Effect (50:50):</strong><div class="eq">|1,1&rang; -> (i/sqrt(2))(|2,0&rang; + |0,2&rang;) -- zero coincidences</div></div>
+<div class="eb"><strong>Coincidence:</strong><div class="eq">P_11(tau) = 1/2 [1 - exp(-(tau/tau_c)^2)]</div></div>
+</div></div>
+</section>
+
+<!-- LAB 4 -->
+<section id="lab-iontrap" class="lab">
+<div class="lh"><div><h2>Ion Trap Physics Simulator</h2><p>Paul trap stability diagram, secular frequency, and Rabi oscillations.</p></div><div class="hb"><span class="badge bu">Unit IV</span><span class="badge bl">LO1,LO4</span></div></div>
+<div class="g2">
+<div class="p">
+<h3>Paul Trap Parameters</h3>
+<div class="cg"><label>Mathieu a: <span id="iaV">0.000</span></label><input type="range" id="iaR" min="-0.5" max="0.5" value="0" step="0.005" oninput="document.getElementById('iaV').textContent=parseFloat(this.value).toFixed(3)"></div>
+<div class="cg"><label>Mathieu q: <span id="iqV">0.400</span></label><input type="range" id="iqR" min="0" max="0.908" value="0.4" step="0.005" oninput="document.getElementById('iqV').textContent=parseFloat(this.value).toFixed(3)"></div>
+<div class="cg"><label>RF freq Omega (MHz): <span id="ioV">20</span></label><input type="range" id="ioR" min="5" max="100" value="20" step="1" oninput="document.getElementById('ioV').textContent=this.value"></div>
+<div class="br"><button class="btn bp" onclick="compIon()">Compute</button></div>
+<div class="rb"><h4>Trap Properties</h4>
+<div class="rr"><span>Stability</span><span id="iSt">--</span></div>
+<div class="rr"><span>Secular freq</span><span id="iSec">--</span></div>
+<div class="rr"><span>Trap depth (eV)</span><span id="iDep">--</span></div>
+</div>
+<h3 style="margin-top:1rem">Rabi Oscillations</h3>
+<div class="cg"><label>Rabi freq (kHz): <span id="irV">100</span></label><input type="range" id="irR" min="1" max="500" value="100" step="1" oninput="document.getElementById('irV').textContent=this.value"></div>
+<div class="cg"><label>Detuning (kHz): <span id="idV">0</span></label><input type="range" id="idR" min="-200" max="200" value="0" step="1" oninput="document.getElementById('idV').textContent=this.value"></div>
+<div class="cg"><label>Damping (kHz): <span id="igV">0</span></label><input type="range" id="igR" min="0" max="50" value="0" step="0.5" oninput="document.getElementById('igV').textContent=this.value"></div>
+<button class="btn bp bsm" onclick="compRabi()">Compute Rabi</button>
+</div>
+<div class="p"><h3>Stability Diagram</h3><canvas id="cStab" style="height:340px"></canvas><h3 style="margin-top:.8rem">Rabi Oscillations</h3><canvas id="cRabi" style="height:240px"></canvas></div>
+</div>
+<div class="p tp"><h3>Physics Reference</h3><div class="tc">
+<div class="eb"><strong>Mathieu Equation:</strong><div class="eq">d^2 u/d zeta^2 + (a - 2q cos(2 zeta)) u = 0</div></div>
+<div class="eb"><strong>Secular Frequency:</strong><div class="eq">w_sec = (Omega/2) sqrt(a + q^2/2)</div></div>
+<div class="eb"><strong>Rabi:</strong><div class="eq">P_up(t) = (Omega_R^2/Omega'^2) sin^2(Omega' t/2), Omega'=sqrt(Omega_R^2 + delta^2)</div></div>
+</div></div>
+</section>
+
+<!-- LAB 5 -->
+<section id="lab-nvcenter" class="lab">
+<div class="lh"><div><h2>NV Center Spin Lab</h2><p>Simulate Zeeman splitting, ODMR spectra in diamond NV centers.</p></div><div class="hb"><span class="badge bu">Unit V</span><span class="badge bl">LO1,LO4</span></div></div>
+<div class="g2">
+<div class="p">
+<h3>NV Center Parameters</h3>
+<div class="cg"><label>B field (mT): <span id="nbV">0</span></label><input type="range" id="nbR" min="0" max="200" value="0" step="0.5" oninput="document.getElementById('nbV').textContent=this.value"></div>
+<div class="cg"><label>Field angle (deg): <span id="ntV">0</span></label><input type="range" id="ntR" min="0" max="90" value="0" step="1" oninput="document.getElementById('ntV').textContent=this.value"><small>0=along NV axis</small></div>
+<div class="cg"><label>D (GHz): <span id="ndV">2.870</span></label><input type="range" id="ndR" min="2.8" max="2.9" value="2.87" step="0.001" oninput="document.getElementById('ndV').textContent=parseFloat(this.value).toFixed(3)"></div>
+<div class="cg"><label>Strain E (MHz): <span id="neV">0</span></label><input type="range" id="neR" min="0" max="50" value="0" step="0.5" oninput="document.getElementById('neV').textContent=this.value"></div>
+<div class="br"><button class="btn bp" onclick="compNV()">Compute</button><button class="btn bs" onclick="sweepNVB()">Sweep B Field</button></div>
+<div class="rb"><h4>Energy Levels (GHz)</h4>
+<div class="rr"><span>E(ms=0)</span><span id="ne0">--</span></div>
+<div class="rr"><span>E(ms=+1)</span><span id="nep">--</span></div>
+<div class="rr"><span>E(ms=-1)</span><span id="nem">--</span></div>
+<div class="rr"><span>f+ transition</span><span id="nfp">--</span></div>
+<div class="rr"><span>f- transition</span><span id="nfm">--</span></div>
+<div class="rr"><span>Splitting</span><span id="nSp">--</span></div>
+</div>
+</div>
+<div class="p"><h3>Energy vs B Field</h3><canvas id="cNVE" style="height:300px"></canvas><h3 style="margin-top:.8rem">ODMR Spectrum</h3><canvas id="cODMR" style="height:220px"></canvas></div>
+</div>
+<div class="p tp"><h3>Physics Reference</h3><div class="tc">
+<div class="eb"><strong>Spin Hamiltonian (S=1):</strong><div class="eq">H = D*Sz^2 + E(Sx^2 - Sy^2) + ge*muB*B.S</div></div>
+<div class="eb"><strong>Zero-field splitting:</strong><div class="eq">D ~ 2.87 GHz, lifts |ms=0&rang; vs |ms=+/-1&rang; degeneracy</div></div>
+<div class="eb"><strong>Zeeman (B || NV):</strong><div class="eq">f+/- = D +/- 28.025 GHz/T * B</div></div>
+</div></div>
+</section>
+
+</main>
+
+<script>
+// === NAV ===
+document.getElementById('sidebar').addEventListener('click',function(e){
+    var it=e.target.closest('.ni');if(!it)return;
+    document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active')});
+    document.querySelectorAll('.lab').forEach(function(s){s.classList.remove('active')});
+    it.classList.add('active');
+    document.getElementById('lab-'+it.dataset.lab).classList.add('active');
+});
+
+// === PLOT UTIL ===
+function gcs(c){var r=c.getBoundingClientRect();return{w:r.width||c.offsetWidth||500,h:r.height||c.offsetHeight||300}}
+var COLS=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
+
+function drawPlot(c,cfg){
+    var s=gcs(c),w=s.w,h=s.h,dp=window.devicePixelRatio||1;
+    c.width=w*dp;c.height=h*dp;
+    var x=c.getContext('2d');x.scale(dp,dp);
+    var P={t:28,r:18,b:36,l:50},pW=w-P.l-P.r,pH=h-P.t-P.b;
+    x.fillStyle='#0d1220';x.fillRect(0,0,w,h);
+    var xR=cfg.xMax-cfg.xMin||1,yR=cfg.yMax-cfg.yMin||1;
+    function tx(v){return P.l+(v-cfg.xMin)/xR*pW}
+    function ty(v){return P.t+pH-(v-cfg.yMin)/yR*pH}
+    // grid
+    x.strokeStyle='#1e2a3a';x.lineWidth=.5;
+    for(var i=0;i<=5;i++){var gx=P.l+i/5*pW;x.beginPath();x.moveTo(gx,P.t);x.lineTo(gx,P.t+pH);x.stroke();var gy=P.t+i/5*pH;x.beginPath();x.moveTo(P.l,gy);x.lineTo(P.l+pW,gy);x.stroke()}
+    // axes
+    x.strokeStyle='#2a3a50';x.lineWidth=1;x.beginPath();x.moveTo(P.l,P.t);x.lineTo(P.l,P.t+pH);x.lineTo(P.l+pW,P.t+pH);x.stroke();
+    // labels
+    x.fillStyle='#64748b';x.font='10px Inter';x.textAlign='center';
+    for(var i=0;i<=5;i++){var v=cfg.xMin+i/5*xR;x.fillText(v.toPrecision(3),P.l+i/5*pW,P.t+pH+15)}
+    x.textAlign='right';for(var i=0;i<=5;i++){var v=cfg.yMin+(1-i/5)*yR;x.fillText(v.toPrecision(3),P.l-6,P.t+i/5*pH+4)}
+    if(cfg.xL){x.fillStyle='#94a3b8';x.font='11px Inter';x.textAlign='center';x.fillText(cfg.xL,P.l+pW/2,h-4)}
+    if(cfg.yL){x.save();x.translate(10,P.t+pH/2);x.rotate(-Math.PI/2);x.fillStyle='#94a3b8';x.font='11px Inter';x.textAlign='center';x.fillText(cfg.yL,0,0);x.restore()}
+    if(cfg.title){x.fillStyle='#e8ecf4';x.font='bold 12px Inter';x.textAlign='center';x.fillText(cfg.title,P.l+pW/2,14)}
+    // data
+    cfg.ds.forEach(function(d,di){
+        x.strokeStyle=d.c||COLS[di%8];x.lineWidth=d.dash?1.5:2;
+        if(d.dash)x.setLineDash([5,3]);else x.setLineDash([]);
+        x.beginPath();var st=false;
+        for(var i=0;i<d.x.length;i++){var px=tx(d.x[i]),py=ty(d.y[i]);
+            if(py<P.t-5||py>P.t+pH+5){st=false;continue}
+            if(!st){x.moveTo(px,py);st=true}else x.lineTo(px,py)}
+        x.stroke();x.setLineDash([]);
+    });
+    // legend
+    var lx=P.l+8,ly=P.t+8;x.font='10px Inter';
+    cfg.ds.forEach(function(d,di){if(!d.l)return;x.fillStyle=d.c||COLS[di%8];x.fillRect(lx,ly-3,12,3);x.fillStyle='#94a3b8';x.textAlign='left';x.fillText(d.l,lx+16,ly+1);ly+=13});
+}
+
+// === EIGENVALUE SOLVER (Jacobi) ===
+function eig(M,n){
+    var A=[],V=[];
+    for(var i=0;i<n;i++){A[i]=[];V[i]=[];for(var j=0;j<n;j++){A[i][j]=M[i][j];V[i][j]=i===j?1:0}}
+    for(var it=0;it<200;it++){
+        var mx=0,p=0,q=1;
+        for(var i=0;i<n;i++)for(var j=i+1;j<n;j++)if(Math.abs(A[i][j])>mx){mx=Math.abs(A[i][j]);p=i;q=j}
+        if(mx<1e-12)break;
+        var th=.5*Math.atan2(2*A[p][q],A[q][q]-A[p][p]),co=Math.cos(th),si=Math.sin(th);
+        var pp=A[p][p],qq=A[q][q],pq=A[p][q];
+        A[p][p]=co*co*pp-2*si*co*pq+si*si*qq;A[q][q]=si*si*pp+2*si*co*pq+co*co*qq;A[p][q]=0;A[q][p]=0;
+        for(var i=0;i<n;i++){if(i!==p&&i!==q){var ip=A[i][p],iq=A[i][q];A[i][p]=co*ip-si*iq;A[p][i]=A[i][p];A[i][q]=si*ip+co*iq;A[q][i]=A[i][q]}}
+        for(var i=0;i<n;i++){var vp=V[i][p],vq=V[i][q];V[i][p]=co*vp-si*vq;V[i][q]=si*vp+co*vq}
+    }
+    var ev=[];for(var i=0;i<n;i++)ev.push(A[i][i]);
+    var idx=ev.map(function(_,i){return i});idx.sort(function(a,b){return ev[a]-ev[b]});
+    return idx.map(function(i){return ev[i]});
+}
+
+// ==========================================
+// LAB 1: DECOHERENCE
+// ==========================================
+var C={run:false,t:0,rx0:1,ry0:0,rz0:0,rx:1,ry:0,rz:0,hist:{t:[],rx:[],ry:[],rz:[],pu:[]},aid:null,lt:null};
+
+function setSt(btn){
+    document.querySelectorAll('.sb').forEach(function(b){b.classList.remove('active')});
+    btn.classList.add('active');
+    var s=btn.dataset.st;
+    document.getElementById('custA').style.display=s==='custom'?'block':'none';
+    initCS(s);drawBloch();updCohDisp();
+}
+function applyPreset(v){
+    if(v==='transmon'){document.getElementById('t1R').value=50;document.getElementById('t2R').value=30}
+    else if(v==='ion'){document.getElementById('t1R').value=200;document.getElementById('t2R').value=200}
+    else if(v==='nv'){document.getElementById('t1R').value=120;document.getElementById('t2R').value=40}
+    document.getElementById('t1V').textContent=document.getElementById('t1R').value;
+    document.getElementById('t2V').textContent=document.getElementById('t2R').value;
+}
+function initCS(s){
+    var th=Math.PI/2,ph=0;
+    if(s==='zero'){th=0}else if(s==='one'){th=Math.PI}else if(s==='custom'){th=parseFloat(document.getElementById('thR').value)*Math.PI/180;ph=parseFloat(document.getElementById('phR').value)*Math.PI/180}
+    C.rx0=Math.sin(th)*Math.cos(ph);C.ry0=Math.sin(th)*Math.sin(ph);C.rz0=Math.cos(th);
+    C.rx=C.rx0;C.ry=C.ry0;C.rz=C.rz0;C.t=0;C.hist={t:[],rx:[],ry:[],rz:[],pu:[]};
+}
+function evolve(){
+    var T1=parseFloat(document.getElementById('t1R').value),T2=parseFloat(document.getElementById('t2R').value),ch=document.getElementById('chSel').value,t=C.t;
+    if(ch==='combined'){C.rx=C.rx0*Math.exp(-t/T2);C.ry=C.ry0*Math.exp(-t/T2);C.rz=1-(1-C.rz0)*Math.exp(-t/T1)}
+    else if(ch==='amplitude'){C.rx=C.rx0*Math.exp(-t/(2*T1));C.ry=C.ry0*Math.exp(-t/(2*T1));C.rz=1-(1-C.rz0)*Math.exp(-t/T1)}
+    else if(ch==='phase'){C.rx=C.rx0*Math.exp(-t/T2);C.ry=C.ry0*Math.exp(-t/T2);C.rz=C.rz0}
+    else{var d=Math.exp(-t/T1);C.rx=C.rx0*d;C.ry=C.ry0*d;C.rz=C.rz0*d}
+}
+function drawBloch(){
+    var cv=document.getElementById('cBloch'),s=gcs(cv),w=s.w,h=s.h,dp=window.devicePixelRatio||1;
+    cv.width=w*dp;cv.height=h*dp;var x=cv.getContext('2d');x.scale(dp,dp);
+    var cx=w/2,cy=h/2,R=Math.min(w,h)*.36;
+    x.fillStyle='#0d1220';x.fillRect(0,0,w,h);
+    var tX=.35,tY=-.5;
+    function pr(a,b,c){var x1=a*Math.cos(tY)+c*Math.sin(tY),z1=-a*Math.sin(tY)+c*Math.cos(tY),y1=b*Math.cos(tX)-z1*Math.sin(tX);return{x:cx+x1*R,y:cy-y1*R}}
+    // circles
+    function drawCircle(fx,fy,fz,col){x.strokeStyle=col;x.lineWidth=1;x.beginPath();for(var i=0;i<=64;i++){var a=i/64*Math.PI*2,p=pr(fx(a),fy(a),fz(a));if(i===0)x.moveTo(p.x,p.y);else x.lineTo(p.x,p.y)}x.stroke()}
+    drawCircle(Math.cos,function(){return 0},Math.sin,'rgba(59,130,246,.18)');
+    drawCircle(Math.cos,Math.sin,function(){return 0},'rgba(139,92,246,.14)');
+    drawCircle(function(){return 0},Math.cos,Math.sin,'rgba(6,182,212,.14)');
+    // axes
+    var axes=[{d:[1,0,0],l:'X',c:'#ef4444'},{d:[0,1,0],l:'Z',c:'#10b981'},{d:[0,0,1],l:'Y',c:'#3b82f6'}];
+    axes.forEach(function(ax){
+        var pp=pr(ax.d[0]*1.15,ax.d[1]*1.15,ax.d[2]*1.15),pn=pr(-ax.d[0]*1.15,-ax.d[1]*1.15,-ax.d[2]*1.15);
+        x.strokeStyle=ax.c+'40';x.lineWidth=1;x.beginPath();x.moveTo(pn.x,pn.y);x.lineTo(pp.x,pp.y);x.stroke();
+        x.fillStyle=ax.c;x.font='bold 12px Inter';x.textAlign='center';x.fillText(ax.l,pp.x,pp.y-6);
+    });
+    var p0=pr(0,1.25,0),p1=pr(0,-1.25,0);
+    x.fillStyle='#10b981';x.font='bold 13px JetBrains Mono';x.fillText('|0>',p0.x+14,p0.y);x.fillText('|1>',p1.x+14,p1.y);
+    // trail
+    if(C.hist.rx.length>1){var ln=C.hist.rx.length;x.strokeStyle='rgba(139,92,246,.4)';x.lineWidth=1.5;x.beginPath();
+        for(var i=Math.max(0,ln-400);i<ln;i++){var p=pr(C.hist.rx[i],C.hist.rz[i],C.hist.ry[i]);if(i===Math.max(0,ln-400))x.moveTo(p.x,p.y);else x.lineTo(p.x,p.y)}x.stroke()}
+    // vector
+    var pS=pr(C.rx,C.rz,C.ry),pO=pr(0,0,0);
+    x.strokeStyle='#60a5fa';x.lineWidth=2.5;x.beginPath();x.moveTo(pO.x,pO.y);x.lineTo(pS.x,pS.y);x.stroke();
+    var pu=C.rx*C.rx+C.ry*C.ry+C.rz*C.rz,ps=5+3*pu;
+    x.beginPath();x.arc(pS.x,pS.y,ps,0,Math.PI*2);
+    var g=x.createRadialGradient(pS.x,pS.y,0,pS.x,pS.y,ps);g.addColorStop(0,'#fff');g.addColorStop(.3,'#60a5fa');g.addColorStop(1,'rgba(59,130,246,0)');x.fillStyle=g;x.fill();
+    x.beginPath();x.arc(pS.x,pS.y,ps+8,0,Math.PI*2);var g2=x.createRadialGradient(pS.x,pS.y,ps-2,pS.x,pS.y,ps+10);g2.addColorStop(0,'rgba(96,165,250,.4)');g2.addColorStop(1,'rgba(96,165,250,0)');x.fillStyle=g2;x.fill();
+}
+function updCohDisp(){
+    var rx=C.rx,ry=C.ry,rz=C.rz;
+    document.getElementById('dRx').textContent=rx.toFixed(3);document.getElementById('dRy').textContent=ry.toFixed(3);document.getElementById('dRz').textContent=rz.toFixed(3);
+    var pu=.5*(1+rx*rx+ry*ry+rz*rz);
+    document.getElementById('dPu').textContent=pu.toFixed(3);document.getElementById('dTm').textContent=C.t.toFixed(1)+' us';
+    var r00=.5*(1+rz),r11=.5*(1-rz),r01=.5*rx;
+    document.getElementById('r00').textContent=r00.toFixed(3);document.getElementById('r11').textContent=r11.toFixed(3);
+    document.getElementById('r01').textContent=r01.toFixed(3);document.getElementById('r10').textContent=r01.toFixed(3);
+    document.getElementById('dTr').textContent=(r00+r11).toFixed(3);document.getElementById('dPu2').textContent=pu.toFixed(3);
+    var lam=.5*(1+Math.sqrt(rx*rx+ry*ry+rz*rz)),l2=1-lam,en=0;
+    if(lam>1e-10&&lam<1-1e-10)en=-lam*Math.log2(lam)-l2*Math.log2(l2);
+    document.getElementById('dEn').textContent=en.toFixed(3);
+}
+function cohLoop(ts){
+    if(!C.run)return;
+    if(!C.lt)C.lt=ts;var el=(ts-C.lt)/1000;C.lt=ts;
+    var sp=parseFloat(document.getElementById('spR').value);C.t+=el*sp*10;
+    evolve();
+    if(C.hist.t.length===0||C.t-C.hist.t[C.hist.t.length-1]>.1){C.hist.t.push(C.t);C.hist.rx.push(C.rx);C.hist.ry.push(C.ry);C.hist.rz.push(C.rz);C.hist.pu.push(.5*(1+C.rx*C.rx+C.ry*C.ry+C.rz*C.rz))}
+    drawBloch();updCohDisp();
+    if(C.hist.t.length>2){var tm=Math.max(C.hist.t[C.hist.t.length-1],10);
+        drawPlot(document.getElementById('cDecay'),{xMin:0,xMax:tm,yMin:-1.1,yMax:1.1,xL:'Time (us)',yL:'Value',ds:[{x:C.hist.t,y:C.hist.rx,c:'#ef4444',l:'<X>'},{x:C.hist.t,y:C.hist.ry,c:'#3b82f6',l:'<Y>'},{x:C.hist.t,y:C.hist.rz,c:'#10b981',l:'<Z>'},{x:C.hist.t,y:C.hist.pu,c:'#f59e0b',l:'Purity',dash:1}]})}
+    C.aid=requestAnimationFrame(cohLoop);
+}
+function toggleCoh(){if(C.run){C.run=false;document.getElementById('cohGo').innerHTML='&#9654; Start'}else{C.run=true;C.lt=null;document.getElementById('cohGo').innerHTML='&#9646;&#9646; Pause';cohLoop(performance.now())}}
+function resetCoh(){C.run=false;document.getElementById('cohGo').innerHTML='&#9654; Start';if(C.aid)cancelAnimationFrame(C.aid);var a=document.querySelector('.sb.active');initCS(a?a.dataset.st:'plus');drawBloch();updCohDisp()}
+
+// ==========================================
+// LAB 2: TRANSMON
+// ==========================================
+function buildH(ej_ec,ec,ng,nm){
+    var ej=ej_ec*ec,dim=2*nm+1,H=[];
+    for(var i=0;i<dim;i++){H[i]=[];for(var j=0;j<dim;j++)H[i][j]=0}
+    for(var i=0;i<dim;i++){var n=i-nm;H[i][i]=4*ec*(n-ng)*(n-ng);if(i+1<dim){H[i][i+1]=-ej/2;H[i+1][i]=-ej/2}}
+    return{H:H,dim:dim};
+}
+function compTrans(){
+    var ratio=parseFloat(document.getElementById('trR').value),ec=parseFloat(document.getElementById('trE').value),ng=parseFloat(document.getElementById('trN').value),nm=parseInt(document.getElementById('trB').value),nl=parseInt(document.getElementById('trL').value);
+    var r=buildH(ratio,ec,ng,nm),ev=eig(r.H,r.dim),E0=ev[0],en=[];
+    for(var i=0;i<nl;i++)en.push(ev[i]-E0);
+    if(nl>=2){document.getElementById('tw01').textContent=(en[1]).toFixed(4)+' GHz'}
+    if(nl>=3){var w12=en[2]-en[1],w01=en[1];document.getElementById('tw12').textContent=w12.toFixed(4)+' GHz';var al=w12-w01;document.getElementById('tAlpha').textContent=(al*1000).toFixed(1)+' MHz';document.getElementById('tRel').textContent=(al/w01*100).toFixed(2)+'%'}
+    // charge dispersion
+    var e05=eig(buildH(ratio,ec,.5,nm).H,2*nm+1),e00=eig(buildH(ratio,ec,0,nm).H,2*nm+1);
+    document.getElementById('tDisp').textContent=(Math.abs((e05[1]-e05[0])-(e00[1]-e00[0]))*1000).toFixed(3)+' MHz';
+    // draw spectrum
+    var cv=document.getElementById('cSpec'),s=gcs(cv),w=s.w,h=s.h,dp=window.devicePixelRatio||1;
+    cv.width=w*dp;cv.height=h*dp;var x=cv.getContext('2d');x.scale(dp,dp);
+    x.fillStyle='#0d1220';x.fillRect(0,0,w,h);
+    var pad={t:35,r:35,b:35,l:55},pH=h-pad.t-pad.b,pW=w-pad.l-pad.r,mE=en[en.length-1]*1.1||1;
+    en.forEach(function(E,i){
+        var y=pad.t+pH-(E/mE)*pH,x1=pad.l+pW*.15,x2=pad.l+pW*.8;
+        x.strokeStyle=COLS[i%8];x.lineWidth=3;x.shadowColor=COLS[i%8];x.shadowBlur=8;x.beginPath();x.moveTo(x1,y);x.lineTo(x2,y);x.stroke();x.shadowBlur=0;
+        x.fillStyle=COLS[i%8];x.font='bold 11px JetBrains Mono';x.textAlign='left';x.fillText('|'+i+'> '+E.toFixed(3)+' GHz',x2+8,y+4);
+        if(i>0){var yP=pad.t+pH-(en[i-1]/mE)*pH,aX=pad.l+pW*.08;x.strokeStyle='rgba(255,255,255,.2)';x.lineWidth=1;x.setLineDash([4,4]);x.beginPath();x.moveTo(aX,yP);x.lineTo(aX,y);x.stroke();x.setLineDash([]);
+        x.fillStyle='#94a3b8';x.font='9px JetBrains Mono';x.textAlign='right';x.fillText('w'+(i-1)+i+'='+(E-en[i-1]).toFixed(3),aX-4,(y+yP)/2+3)}
+    });
+    x.fillStyle='#e8ecf4';x.font='bold 13px Inter';x.textAlign='center';x.fillText('Transmon Spectrum - EJ/EC='+ratio,w/2,18);
+}
+function sweepEjEc(){
+    var ec=parseFloat(document.getElementById('trE').value),ng=parseFloat(document.getElementById('trN').value),nm=parseInt(document.getElementById('trB').value),nl=parseInt(document.getElementById('trL').value);
+    var ld=[];for(var i=0;i<nl;i++)ld.push({x:[],y:[]});
+    for(var r=1;r<=100;r+=1){var ev=eig(buildH(r,ec,ng,nm).H,2*nm+1),E0=ev[0];for(var i=0;i<nl;i++){ld[i].x.push(r);ld[i].y.push(ev[i]-E0)}}
+    var ds=ld.map(function(d,i){return{x:d.x,y:d.y,c:COLS[i%8],l:'E'+i}});
+    drawPlot(document.getElementById('cAnharm'),{xMin:1,xMax:100,yMin:0,yMax:Math.max.apply(null,ld[nl-1].y)*1.05,xL:'EJ/EC',yL:'Energy (GHz)',title:'Energy vs EJ/EC',ds:ds});
+}
+function sweepNg(){
+    var ratio=parseFloat(document.getElementById('trR').value),ec=parseFloat(document.getElementById('trE').value),nm=parseInt(document.getElementById('trB').value),nl=parseInt(document.getElementById('trL').value);
+    var ld=[];for(var i=0;i<nl;i++)ld.push({x:[],y:[]});
+    for(var ng=0;ng<=1;ng+=.02){var ev=eig(buildH(ratio,ec,ng,nm).H,2*nm+1),E0=ev[0];for(var i=0;i<nl;i++){ld[i].x.push(ng);ld[i].y.push(ev[i]-E0)}}
+    var ds=ld.map(function(d,i){return{x:d.x,y:d.y,c:COLS[i%8],l:'E'+i}});
+    drawPlot(document.getElementById('cNg'),{xMin:0,xMax:1,yMin:0,yMax:Math.max.apply(null,ld[nl-1].y)*1.05,xL:'Gate charge ng',yL:'Energy (GHz)',title:'Charge Dispersion - EJ/EC='+ratio,ds:ds});
+}
+
+// ==========================================
+// LAB 3: PHOTONIC
+// ==========================================
+function compPhot(){
+    var R=parseFloat(document.getElementById('pRR').value),T=1-R,xi=parseFloat(document.getElementById('pDR').value);
+    var p11=R*R+T*T-2*R*T*(1-xi),p20=R*T*(1+(1-xi)),p02=R*T*(1+(1-xi)),tot=p11+p20+p02;
+    document.getElementById('pp20').textContent=(p20/tot).toFixed(4);document.getElementById('pp02').textContent=(p02/tot).toFixed(4);
+    document.getElementById('pp11').textContent=(p11/tot).toFixed(4);
+    document.getElementById('pVis').textContent=((1-xi)*2*R*T/(R*R+T*T)).toFixed(4);
+    // BS diagram
+    var cv=document.getElementById('cBS'),s=gcs(cv),w=s.w,h=s.h,dp=window.devicePixelRatio||1;cv.width=w*dp;cv.height=h*dp;var x=cv.getContext('2d');x.scale(dp,dp);
+    x.fillStyle='#0d1220';x.fillRect(0,0,w,h);var cx=w/2,cy=h/2;
+    x.save();x.translate(cx,cy);x.rotate(Math.PI/4);x.fillStyle='rgba(59,130,246,.15)';x.strokeStyle='#3b82f6';x.lineWidth=2;x.fillRect(-22,-22,44,44);x.strokeRect(-22,-22,44,44);x.restore();
+    x.fillStyle='#60a5fa';x.font='bold 10px JetBrains Mono';x.textAlign='center';x.fillText('BS',cx,cy+4);x.fillText('R='+R.toFixed(2),cx,cy+48);
+    x.strokeStyle='#f59e0b';x.lineWidth=2;x.beginPath();x.moveTo(25,cy-40);x.lineTo(cx-25,cy);x.stroke();x.beginPath();x.moveTo(25,cy+40);x.lineTo(cx-25,cy);x.stroke();
+    x.strokeStyle='#10b981';x.beginPath();x.moveTo(cx+25,cy);x.lineTo(w-25,cy-40);x.stroke();x.beginPath();x.moveTo(cx+25,cy);x.lineTo(w-25,cy+40);x.stroke();
+    x.fillStyle='#f59e0b';x.font='10px JetBrains Mono';x.textAlign='left';x.fillText('|1>',5,cy-43);x.fillText('|1>',5,cy+47);
+    x.fillStyle='#10b981';x.textAlign='right';x.fillText('P='+(p20/tot).toFixed(3),w-5,cy-43);x.fillText('P='+(p02/tot).toFixed(3),w-5,cy+47);
+    x.fillStyle=p11/tot<.01?'#10b981':'#ef4444';x.font='bold 11px Inter';x.textAlign='center';x.fillText('Coincidence P(1,1) = '+(p11/tot).toFixed(4),cx,h-8);
+}
+function sweepHOM(){
+    var R=parseFloat(document.getElementById('pRR').value),T=1-R,xi=parseFloat(document.getElementById('pDR').value),tc=100;
+    var tau=[],coin=[],cl=[];
+    for(var t=-500;t<=500;t+=5){tau.push(t);var ov=(1-xi)*Math.exp(-(t/tc)*(t/tc)),p11=R*R+T*T-2*R*T*ov,p20=R*T*(1+ov),tot=p11+p20+p20;coin.push(p11/tot);cl.push((R*R+T*T)/(R*R+T*T+2*R*T))}
+    drawPlot(document.getElementById('cHOM'),{xMin:-500,xMax:500,yMin:0,yMax:.7,xL:'Delay tau (fs)',yL:'P(1,1)',title:'Hong-Ou-Mandel Dip',ds:[{x:tau,y:coin,c:'#3b82f6',l:'Quantum'},{x:tau,y:cl,c:'#ef4444',l:'Classical',dash:1}]});
+}
+function compMZI(){
+    var ph=parseFloat(document.getElementById('pMR').value)*Math.PI/180;
+    document.getElementById('pM1').textContent=Math.cos(ph/2).toFixed(4).replace(/^/, function(){return Math.cos(ph/2)>=0?'':''});
+    document.getElementById('pM1').textContent=(Math.cos(ph/2)*Math.cos(ph/2)).toFixed(4);
+    document.getElementById('pM2').textContent=(Math.sin(ph/2)*Math.sin(ph/2)).toFixed(4);
+}
+
+// ==========================================
+// LAB 4: ION TRAP
+// ==========================================
+function compIon(){
+    var a=parseFloat(document.getElementById('iaR').value),q=parseFloat(document.getElementById('iqR').value),om=parseFloat(document.getElementById('ioR').value);
+    var b2=a+q*q/2,stable=b2>0&&q<.908;
+    var el=document.getElementById('iSt');el.textContent=stable?'STABLE':'UNSTABLE';el.style.color=stable?'#10b981':'#ef4444';
+    if(stable){var b=Math.sqrt(b2),sf=b*om/2;document.getElementById('iSec').textContent=sf.toFixed(3)+' MHz';
+        var m=40*1.66e-27,e=1.6e-19,ws=sf*1e6*2*Math.PI,r0=.5e-3;document.getElementById('iDep').textContent=(.5*m*ws*ws*r0*r0/e).toFixed(4)+' eV'}
+    else{document.getElementById('iSec').textContent='N/A';document.getElementById('iDep').textContent='N/A'}
+    // stability diagram
+    var cv=document.getElementById('cStab'),s=gcs(cv),w=s.w,h=s.h,dp=window.devicePixelRatio||1;cv.width=w*dp;cv.height=h*dp;var x=cv.getContext('2d');x.scale(dp,dp);
+    x.fillStyle='#0d1220';x.fillRect(0,0,w,h);
+    var P={t:30,r:18,b:36,l:45},pW=w-P.l-P.r,pH=h-P.t-P.b,qM=1,aMin=-.5,aMax=.5;
+    function tx(qv){return P.l+qv/qM*pW}function ty(av){return P.t+pH-(av-aMin)/(aMax-aMin)*pH}
+    // pixel stability
+    var id=x.createImageData(Math.ceil(pW*dp),Math.ceil(pH*dp));
+    for(var px=0;px<pW*dp;px++)for(var py=0;py<pH*dp;py++){
+        var qv=px/(pW*dp)*qM,av=aMax-py/(pH*dp)*(aMax-aMin),b2v=av+qv*qv/2,st=b2v>0&&qv<.908;
+        var idx=(py*Math.ceil(pW*dp)+px)*4;
+        if(st){var bv=Math.sqrt(b2v);id.data[idx]=20+bv*40;id.data[idx+1]=40+bv*100;id.data[idx+2]=80+bv*150;id.data[idx+3]=100}
+        else{id.data[idx]=13;id.data[idx+1]=18;id.data[idx+2]=32;id.data[idx+3]=255}}
+    x.putImageData(id,P.l*dp,P.t*dp);
+    // axes
+    x.strokeStyle='#2a3a50';x.lineWidth=1;x.beginPath();x.moveTo(P.l,P.t);x.lineTo(P.l,P.t+pH);x.lineTo(P.l+pW,P.t+pH);x.stroke();
+    x.fillStyle='#64748b';x.font='10px Inter';x.textAlign='center';
+    for(var i=0;i<=5;i++)x.fillText((i*.2).toFixed(1),P.l+i/5*pW,P.t+pH+14);
+    x.textAlign='right';for(var i=0;i<=5;i++){var v=aMin+(1-i/5)*(aMax-aMin);x.fillText(v.toFixed(1),P.l-5,P.t+i/5*pH+4)}
+    x.fillStyle='#94a3b8';x.font='11px Inter';x.textAlign='center';x.fillText('q',P.l+pW/2,h-4);
+    x.fillStyle='#e8ecf4';x.font='bold 12px Inter';x.fillText('Stability Diagram',P.l+pW/2,16);
+    // current point
+    var cpx=tx(q),cpy=ty(a);x.beginPath();x.arc(cpx,cpy,7,0,Math.PI*2);
+    var cg=x.createRadialGradient(cpx,cpy,0,cpx,cpy,7);cg.addColorStop(0,'#fff');cg.addColorStop(.4,'#f59e0b');cg.addColorStop(1,'rgba(245,158,11,0)');x.fillStyle=cg;x.fill();
+    x.strokeStyle='#f59e0b';x.lineWidth=2;x.beginPath();x.arc(cpx,cpy,5,0,Math.PI*2);x.stroke();
+    x.fillStyle='rgba(59,130,246,.5)';x.font='bold 14px Inter';x.fillText('STABLE',tx(.3),ty(.05));
+}
+function compRabi(){
+    var Or=parseFloat(document.getElementById('irR').value),de=parseFloat(document.getElementById('idR').value),ga=parseFloat(document.getElementById('igR').value);
+    var Oe=Math.sqrt(Or*Or+de*de),tMax=5/Or*1000,ts=[],pu=[],pd=[];
+    for(var t=0;t<=tMax;t+=tMax/400){ts.push(t);var tMs=t/1000,dm=Math.exp(-ga*tMs),pe=Or*Or/(Oe*Oe)*Math.pow(Math.sin(Math.PI*Oe*tMs),2)*dm;pu.push(pe);pd.push(1-pe)}
+    drawPlot(document.getElementById('cRabi'),{xMin:0,xMax:tMax,yMin:0,yMax:1.05,xL:'Time (us)',yL:'Probability',title:'Rabi - Or='+Or+'kHz, delta='+de+'kHz',ds:[{x:ts,y:pu,c:'#3b82f6',l:'P(up)'},{x:ts,y:pd,c:'#ef4444',l:'P(down)',dash:1}]});
+}
+
+// ==========================================
+// LAB 5: NV CENTER
+// ==========================================
+function compNV(){
+    var B=parseFloat(document.getElementById('nbR').value),thB=parseFloat(document.getElementById('ntR').value)*Math.PI/180,D=parseFloat(document.getElementById('ndR').value),E=parseFloat(document.getElementById('neR').value)/1000;
+    var gam=28.025,BT=B/1000,Bz=BT*Math.cos(thB),Bx=BT*Math.sin(thB),sq2=Math.sqrt(2);
+    var H=[[D+gam*Bz,gam*Bx/sq2,E],[gam*Bx/sq2,0,gam*Bx/sq2],[E,gam*Bx/sq2,D-gam*Bz]];
+    var en=eig(H,3);
+    document.getElementById('ne0').textContent=en[0].toFixed(4)+' GHz';
+    document.getElementById('nem').textContent=en[1].toFixed(4)+' GHz';
+    document.getElementById('nep').textContent=en[2].toFixed(4)+' GHz';
+    var fp=en[2]-en[0],fm=en[1]-en[0];
+    document.getElementById('nfp').textContent=fp.toFixed(4)+' GHz';document.getElementById('nfm').textContent=fm.toFixed(4)+' GHz';
+    document.getElementById('nSp').textContent=Math.abs(fp-fm).toFixed(4)+' GHz';
+    // ODMR
+    var fc=(fp+fm)/2,fr=Math.max(Math.abs(fp-fm)*2,.3),fMin=fc-fr,fMax=fc+fr,lw=.005,fs=[],pl=[];
+    for(var f=fMin;f<=fMax;f+=(fMax-fMin)/400){fs.push(f);var d1=.3/(1+Math.pow((f-fp)/lw,2)),d2=.3/(1+Math.pow((f-fm)/lw,2));pl.push(1-d1-d2)}
+    drawPlot(document.getElementById('cODMR'),{xMin:fMin,xMax:fMax,yMin:.4,yMax:1.05,xL:'MW Freq (GHz)',yL:'PL Intensity',title:'ODMR Spectrum',ds:[{x:fs,y:pl,c:'#10b981',l:'PL signal'}]});
+}
+function sweepNVB(){
+    var thB=parseFloat(document.getElementById('ntR').value)*Math.PI/180,D=parseFloat(document.getElementById('ndR').value),Es=parseFloat(document.getElementById('neR').value)/1000;
+    var gam=28.025,sq2=Math.sqrt(2),bf=[],e0=[],e1=[],e2=[];
+    for(var B=0;B<=200;B+=1){var BT=B/1000,Bz=BT*Math.cos(thB),Bx=BT*Math.sin(thB);
+        var H=[[D+gam*Bz,gam*Bx/sq2,Es],[gam*Bx/sq2,0,gam*Bx/sq2],[Es,gam*Bx/sq2,D-gam*Bz]];
+        var en=eig(H,3);bf.push(B);e0.push(en[0]);e1.push(en[1]);e2.push(en[2])}
+    drawPlot(document.getElementById('cNVE'),{xMin:0,xMax:200,yMin:Math.min.apply(null,e0)-.2,yMax:Math.max.apply(null,e2)+.2,xL:'B (mT)',yL:'Energy (GHz)',title:'NV Zeeman Splitting',ds:[{x:bf,y:e0,c:'#3b82f6',l:'E0 (ms~0)'},{x:bf,y:e1,c:'#10b981',l:'E1 (ms~-1)'},{x:bf,y:e2,c:'#ef4444',l:'E2 (ms~+1)'}]});
+    compNV();
+}
+
+// === INIT ===
+initCS('plus');
+requestAnimationFrame(function(){drawBloch();updCohDisp()});
+</script>
+</body>
+</html>
